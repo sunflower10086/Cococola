@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // ServiceDiscovery 服务发现
@@ -98,12 +98,27 @@ func (s *ServiceDiscovery) GetServices() []string {
 
 // GetService 获取服务地址
 func (s *ServiceDiscovery) GetService(serviceName string) (string, error) {
+
 	s.lock.Lock()
-	defer s.lock.Unlock()
 
 	if v, ok := s.serverList[serviceName]; ok {
+		s.lock.Unlock()
 		return v, nil
 	}
+	s.lock.Unlock()
+
+	for {
+		select {
+		case <-time.Tick(7 * time.Second):
+			s.lock.Lock()
+			if v, ok := s.serverList[serviceName]; ok {
+				s.lock.Unlock()
+				return v, nil
+			}
+		}
+		break
+	}
+
 	return "", fmt.Errorf("the %s service does not exist", serviceName)
 }
 

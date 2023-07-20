@@ -3,7 +3,6 @@ package etcd
 import (
 	"log"
 	"testing"
-	"time"
 )
 
 func TestDiscover(t *testing.T) {
@@ -12,11 +11,12 @@ func TestDiscover(t *testing.T) {
 	defer ser.Close()
 	ser.WatchService("/web/")
 	ser.WatchService("/gRPC/")
-	for {
-		select {
-		case <-time.Tick(10 * time.Second):
-			log.Println(ser.GetServices())
-			log.Println(ser.GetService("/web/backend"))
-		}
-	}
+	log.Println(ser.GetService("/web/backend"))
+	// for {
+	// 	select {
+	// 	case <-time.Tick(10 * time.Second):
+	// 		log.Println(ser.GetServices())
+	// 		log.Println(ser.GetService("/web/backend"))
+	// 	}
+	// }
 }

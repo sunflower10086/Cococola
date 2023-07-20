@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // ServiceRegister 创建租约注册服务
@@ -61,19 +61,18 @@ func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 		return err
 	}
 	s.leaseID = resp.ID
-	log.Println(s.leaseID)
 	s.keepAliveChan = leaseRespChan
 	log.Printf("Put key:%s  val:%s  success!", s.key, s.val)
 	return nil
 }
 
-// ListenLeaseRespChan 监听 续租情况
-func (s *ServiceRegister) ListenLeaseRespChan() {
-	for leaseKeepResp := range s.keepAliveChan {
-		log.Println("续约成功", leaseKeepResp)
-	}
-	log.Println("关闭续租")
-}
+// // ListenLeaseRespChan 监听 续租情况
+// func (s *ServiceRegister) ListenLeaseRespChan() {
+// 	for leaseKeepResp := range s.keepAliveChan {
+// 		log.Println("续约成功", leaseKeepResp)
+// 	}
+// 	log.Println("关闭续租")
+// }
 
 // Close 注销服务
 func (s *ServiceRegister) Close() error {
